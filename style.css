@@ -1,0 +1,25 @@
+.jost {
+    font-family: "Jost", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+  }
+  .container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .tiles-container{
+    display: flex;
+    flex-direction: row;
+  }
+  .tile-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 250px;
+    height: 200px;
+    border: 3px;
+    border-radius: 3px;
+    margin: 100;
+  }
