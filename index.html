@@ -1,32 +1,131 @@
-<html>
-    <head>
-        <link rel="stylesheet" href="style.css">
-        <!-- Font -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    </head>
-    <body>
-        <div class="container">
-            <h1 class="jost">
-                Rate Us Now!
-            </h1>
-            <ul class="tiles-container">
-                <li class="tile-container">
-                    <button id="rateNow1">⭐</button></li>
-                <li class="tile-container">   
-                    <button id="rateNow2">⭐</button></li>
-                <li class="tile-container">
-                    <button id="rateNow3">⭐</button></li>
-                <li class="tile-container">
-                    <button id="rateNow4">⭐</button></li>
-                <li class="tile-container">
-                    <button id="rateNow5">⭐</button></li>
-            </ul>
-            <h2 class="jost">
-                Join millions of other satisfied customers as part of the PVR family!
-            </h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menger Sponge</title>
+  <style>
+    body { margin: 0; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
 
-        </div>
-    </body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <script>
+    // Initialize Three.js scene
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.getElementById('container').appendChild(renderer.domElement);
+
+    // Custom function to create Menger sponge geometry
+    function createMengerSponge(level, size) {
+      if (level === 0) {
+        const geometry = new THREE.BoxGeometry(size, size, size);
+        return new THREE.Mesh(geometry, new THREE.MeshNormalMaterial());
+      } else {
+        const group = new THREE.Group();
+        const step = size / 3;
+
+        for (let x = -1; x <= 1; x++) {
+          for (let y = -1; y <= 1; y++) {
+            for (let z = -1; z <= 1; z++) {
+              if (Math.abs(x) + Math.abs(y) + Math.abs(z) > 1) {
+                const cube = createMengerSponge(level - 1, step);
+                cube.position.set(x * step, y * step, z * step);
+                group.add(cube);
+              }
+            }
+          }
+        }
+
+        return group;
+      }
+    }
+
+    // Create Menger sponge
+    const level = 2; // Adjust the level for lower complexity
+    const size = 3;
+    const mengerSponge = createMengerSponge(level, size);
+    scene.add(mengerSponge);
+
+    // Add lighting
+    const ambientLight = new THREE.AmbientLight(0xac19e2, 0.5);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xac19e2, 0.5);
+    scene.add(directionalLight);
+
+    // Drag and rotate functionality
+    let isDragging = false;
+    let previousMousePosition = {
+      x: 0,
+      y: 0
+    };
+
+    function onMouseMove(event) {
+      const deltaMove = {
+        x: event.clientX - previousMousePosition.x,
+        y: event.clientY - previousMousePosition.y
+      };
+
+      if (isDragging) {
+        const deltaRotationQuaternion = new THREE.Quaternion()
+          .setFromEuler(new THREE.Euler(
+            toRadians(deltaMove.y * 1),
+            toRadians(deltaMove.x * 1),
+            0,
+            'XYZ'
+          ));
+
+        mengerSponge.quaternion.multiplyQuaternions(deltaRotationQuaternion, mengerSponge.quaternion);
+      }
+
+      previousMousePosition = {
+        x: event.clientX,
+        y: event.clientY
+      };
+    }
+
+    function onMouseDown(event) {
+      isDragging = true;
+      previousMousePosition = {
+        x: event.clientX,
+        y: event.clientY
+      };
+    }
+
+    function onMouseUp() {
+      isDragging = false;
+    }
+
+    function toRadians(angle) {
+      return angle * (Math.PI / 180);
+    }
+
+    document.addEventListener('mousemove', onMouseMove, false);
+    document.addEventListener('mousedown', onMouseDown, false);
+    document.addEventListener('mouseup', onMouseUp, false);
+
+    camera.position.z = 5;
+
+    // Render loop
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Resize handling
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
 </html>
